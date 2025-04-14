@@ -1,40 +1,59 @@
+# tile.py
 from PyQt5.QtWidgets import QLabel
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor, QPalette
 
 
 class Tile(QLabel):
-    def __init__(self, value):
+    """Visual representation of a game tile."""
+
+    TILE_COLORS = {
+        0: (QColor(205, 193, 180), QColor(119, 110, 101)),
+        2: (QColor(238, 228, 218), QColor(119, 110, 101)),
+        4: (QColor(237, 224, 200), QColor(119, 110, 101)),
+        8: (QColor(242, 177, 121), QColor(249, 246, 242)),
+        16: (QColor(245, 149, 99), QColor(249, 246, 242)),
+        32: (QColor(246, 124, 95), QColor(249, 246, 242)),
+        64: (QColor(246, 94, 59), QColor(249, 246, 242)),
+        128: (QColor(237, 207, 114), QColor(249, 246, 242)),
+        256: (QColor(237, 204, 97), QColor(249, 246, 242)),
+        512: (QColor(237, 200, 80), QColor(249, 246, 242)),
+        1024: (QColor(237, 197, 63), QColor(249, 246, 242)),
+        2048: (QColor(237, 194, 46), QColor(249, 246, 242)),
+    }
+
+    def __init__(self, value: int):
         super().__init__()
         self.value = value
-        self.setAlignment(Qt.AlignCenter)
-        self.setFixedSize(80, 80)
+        self._setup_ui()
         self.update_style()
 
+    def _setup_ui(self):
+        """Initialize UI elements."""
+        self.setAlignment(Qt.AlignCenter)
+        self.setFixedSize(80, 80)
+        font = QFont("Arial", 24, QFont.Bold)
+        self.setFont(font)
+
     def update_style(self):
-        colors = {
-            0: ("#CDC1B4", "#776E65"),
-            2: ("#EEE4DA", "#776E65"),
-            4: ("#EDE0C8", "#776E65"),
-            8: ("#F2B179", "#F9F6F2"),
-            16: ("#F59563", "#F9F6F2"),
-            32: ("#F67C5F", "#F9F6F2"),
-            64: ("#F65E3B", "#F9F6F2"),
-            128: ("#EDCF72", "#F9F6F2"),
-            256: ("#EDCC61", "#F9F6F2"),
-            512: ("#EDC850", "#F9F6F2"),
-            1024: ("#EDC53F", "#F9F6F2"),
-            2048: ("#EDC22E", "#F9F6F2"),
-        }
+        """Update tile appearance based on its value."""
+        bg_color, text_color = self.TILE_COLORS.get(self.value, (QColor(60, 58, 50), QColor(249, 246, 242)))
 
-        bg_color, text_color = colors.get(self.value, ("#3C3A32", "#F9F6F2"))
+        palette = self.palette()
+        palette.setColor(QPalette.Window, bg_color)
+        palette.setColor(QPalette.WindowText, text_color)
+        self.setAutoFillBackground(True)
+        self.setPalette(palette)
 
-        self.setStyleSheet(f"""
-            background-color: {bg_color};
-            color: {text_color};
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: {24 if self.value < 100 else 20 if self.value < 1000 else 16}px;
-        """)
+        # Adjust font size based on tile value
+        font = self.font()
+        if self.value < 100:
+            font.setPointSize(24)
+        elif self.value < 1000:
+            font.setPointSize(20)
+        else:
+            font.setPointSize(16)
+        self.setFont(font)
 
         self.setText(str(self.value) if self.value != 0 else "")
+        self.setStyleSheet("border-radius: 5px;")
